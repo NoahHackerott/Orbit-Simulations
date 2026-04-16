@@ -1,9 +1,10 @@
 import numpy as np
+import sys
 
 # 2D, 2 Body Problem Orbit Simulation
 # Assumptions:
     # Earth has constant radius and is homogeneous
-    # Treat Earth as a point mass with center of mass at its center (0,0)
+    # Treat Earth as a point mass with center of mass at origin
     # x-y coordinate plane is centered at Earth's center
     # Equatorial orbit to satisfy 2D modelling (z=0)
 
@@ -25,7 +26,7 @@ def acceleration_calc(state):
         # Multiplying a scalar by an entire array which in our case is the r vector (allowed by Numpy)
     return -mu_Earth * r / r_mag**3
 
-# Implement Runge-Kutta to iterate over ODE and find position of satellite
+# Implement Runge-Kutta to iterate over ODE and find position of satellite (NEED to do)
 
 
 
@@ -46,14 +47,17 @@ def main():
     # The input function takes in a string, so need to separate each piece delimited by a comma into the state vector
     state = np.array([float(x) for x in state.split(',')]) # r_x (m), r_y (m), v_x (m/s), v_y (m/s)
 
+
     # Grabs a "slice" of the state vector (first and second elements)
     r = state[0:2]
     r_mag = np.linalg.norm(r)
 
-    # Check for valid conditions of initial position
+
+    # Check for valid conditions of initial position (if not valid stop the program)
     if r_mag <= 6378137:
         print("Error, the body is inside Earth. Exiting...")
-        return
+        sys.exit()
+
 
     # Calculate how many steps for loop will iterate over
     steps = int(t_final/dt)
@@ -61,6 +65,9 @@ def main():
     # For loop to collect data through iterations
     # NEED to write this for loop body
     for i in range(0, steps):
+
+if __name__ == "__main__":
+    main()
 
 
 
