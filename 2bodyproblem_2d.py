@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+from scipy.integrate import solve_ivp
 
 # 2D, 2 Body Problem Orbit Simulation
 # Assumptions:
@@ -26,18 +27,16 @@ def acceleration_calc(state):
         # Multiplying a scalar by an entire array which in our case is the r vector (allowed by Numpy)
     return -mu_Earth * r / r_mag**3
 
-# Implement Runge-Kutta to iterate over ODE and find position of satellite (NEED to do)
-
-
+# Calculates f(t,y) that will be plugged into IVP solver
+def deriv_calc(t, state):
+    state_prime = np.concatenate([state[2:4], acceleration_calc(state[0:2])])
+    return state_prime
 
 
 # Main function
 def main():
-    # Define acceleration vector (using numpy array to allow for smoother/faster vector calculations)
-    acceleration = np.array([0, 0])  # a_x (m/s^2), a_y (m/s^2)
 
     # Other variables
-    time = 0 # (s)
     dt = 0.01 # needs to be updated (s)
     t_final = 100 # Needs to be updated (s)
 
@@ -58,13 +57,10 @@ def main():
         print("Error, the body is inside Earth. Exiting...")
         sys.exit()
 
+    # ODE solver (using RK45)
+    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', first_step=dt)
 
-    # Calculate how many steps for loop will iterate over
-    steps = int(t_final/dt)
-
-    # For loop to collect data through iterations
-    # NEED to write this for loop body
-    for i in range(0, steps):
+    # need to use matplotlib to plot data from solution (maybe also output to txt/csv file)
 
 if __name__ == "__main__":
     main()
