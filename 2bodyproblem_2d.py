@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
 
 # 2D, 2 Body Problem Orbit Simulation
 # Assumptions:
@@ -32,13 +33,17 @@ def deriv_calc(t, state):
     state_prime = np.concatenate([state[2:4], acceleration_calc(state[0:2])])
     return state_prime
 
+# Calculate orbital energy for later plotting
+def orbital_energy(state):
+
+
 
 # Main function
 def main():
 
     # Other variables
-    dt = 0.01 # needs to be updated (s)
-    t_final = 100 # Needs to be updated (s)
+    dt = 10 # (s)
+    t_final = 60000 # (s)
 
 
     state = input("Enter the initial state of the body in standard units [r_x (m), r_y (m), v_x (m/s), v_y (m/s)]: ")
@@ -51,6 +56,9 @@ def main():
     r = state[0:2]
     r_mag = np.linalg.norm(r)
 
+    # Create a variable that will guide how many points will be saved to solution by solve_ivp
+    t_eval = np.linspace(0, t_final, 1000)
+
 
     # Check for valid conditions of initial position (if not valid stop the program)
     if r_mag <= 6378137:
@@ -58,9 +66,20 @@ def main():
         sys.exit()
 
     # ODE solver (using RK45)
-    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', first_step=dt)
+    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', t_eval = t_eval, first_step=dt)
 
-    # need to use matplotlib to plot data from solution (maybe also output to txt/csv file)
+    # Store r_x and r_y in respective variables for plotting
+    x = solution.y[0]
+    y = solution.y[1]
+
+    # Plot solution to visualize orbit
+    # Looking down at the North Pole (equatorial orbit in 2D)
+    plt.plot(x, y, 'b')
+    plt.xlabel('X Position [m]')
+    plt.ylabel('Y Position [m]')
+    plt.title('Orbital Path')
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
