@@ -13,8 +13,7 @@ import matplotlib.pyplot as plt
 
 # Parameters (all in SI Units)
 rad_Earth = 6378137 # meters
-mass_Earth = 5.972e24 # kg
-g_sea_level = 9.81 # m/s^2
+mass_Earth = 5.9722e24 # kg
 grav_const = 6.6743e-11 # (m^3)(kg^-1)(s^-2)
 mu_Earth = grav_const * mass_Earth # m^3/s^2
 
@@ -33,24 +32,21 @@ def deriv_calc(t, state):
     state_prime = np.concatenate([state[2:4], acceleration_calc(state[0:2])])
     return state_prime
 
-# Calculate orbital energy for later plotting
-def orbital_energy(state):
 
-
-
-# Main function
 def main():
 
     # Other variables
-    dt = 10 # (s)
+    dt = 0.01 # (s)
     t_final = 60000 # (s)
 
 
-    state = input("Enter the initial state of the body in standard units [r_x (m), r_y (m), v_x (m/s), v_y (m/s)]: ")
+    state = input("Enter the initial state of the body in the following units [r_x (km), r_y (km), v_x (m/s), v_y (m/s)]: ")
 
     # The input function takes in a string, so need to separate each piece delimited by a comma into the state vector
-    state = np.array([float(x) for x in state.split(',')]) # r_x (m), r_y (m), v_x (m/s), v_y (m/s)
+    state = np.array([float(x) for x in state.split(',')]) # r_x (km), r_y (km), v_x (m/s), v_y (m/s)
 
+    # Convert positions to meters
+    state[0:2] = state[0:2] * 1000
 
     # Grabs a "slice" of the state vector (first and second elements)
     r = state[0:2]
@@ -59,25 +55,32 @@ def main():
     # Create a variable that will guide how many points will be saved to solution by solve_ivp
     t_eval = np.linspace(0, t_final, 1000)
 
-
     # Check for valid conditions of initial position (if not valid stop the program)
     if r_mag <= 6378137:
         print("Error, the body is inside Earth. Exiting...")
         sys.exit()
 
     # ODE solver (using RK45)
-    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', t_eval = t_eval, first_step=dt)
+    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', t_eval = t_eval,
+    first_step=dt, rtol=1e-9, atol=1e-12)
 
     # Store r_x and r_y in respective variables for plotting
-    x = solution.y[0]
-    y = solution.y[1]
+    x = solution.y[0]/1000
+    y = solution.y[1]/1000
 
     # Plot solution to visualize orbit
     # Looking down at the North Pole (equatorial orbit in 2D)
-    plt.plot(x, y, 'b')
-    plt.xlabel('X Position [m]')
-    plt.ylabel('Y Position [m]')
+    plt.plot(x, y, 'r')
+    plt.xlabel('X Position [km]')
+    plt.ylabel('Y Position [km]')
     plt.title('Orbital Path')
+
+    # Plot circle as well to represent Earth
+    circle = plt.Circle((0, 0), radius=rad_Earth/1000, color='b', fill=True)
+    plt.gca().add_patch(circle)
+
+    # Plot orbit and Earth with equivalent axes
+    plt.axis('equal')
     plt.show()
 
 
