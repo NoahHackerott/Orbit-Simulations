@@ -32,40 +32,16 @@ def deriv_calc(t, state):
     state_prime = np.concatenate([state[3:6], acceleration_calc(state[0:3])])
     return state_prime
 
-
-def main():
-
-    # Other variables
-    dt = 0.01 # (s)
-    t_final = 60000 # (s)
-
-
-    state = input("Enter the initial state of the body in the following units [r_x (km), r_y (km) r_z (km)"
-            ", v_x (m/s), v_y (m/s), v_z (m/s]: ")
+def user_input():
+    state = input("Enter the initial altitude and velocity of the body in the following units [r_x (km), r_y (km) r_z (km)"
+         ", v_x (m/s), v_y (m/s), v_z (m/s]: ")
 
     # The input function takes in a string, so need to separate each piece delimited by a comma into the state vector
     # r_x (km), r_y (km), r_z (km), v_x (m/s), v_y (m/s), v_z (m/s)
     state = np.array([float(x) for x in state.split(',')])
+    return state
 
-    # Convert positions to meters
-    state[0:3] = state[0:3] * 1000
-
-    # Grabs a "slice" of the state vector (first and second elements)
-    r = state[0:3]
-    r_mag = np.linalg.norm(r)
-
-    # Create a variable that will guide how many points will be saved to solution by solve_ivp
-    t_eval = np.linspace(0, t_final, 1000)
-
-    # Check for valid conditions of initial position (if not valid stop the program)
-    if r_mag <= 6378137:
-        print("Error, the body is inside Earth. Exiting...")
-        sys.exit()
-
-    # ODE solver (using RK45)
-    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', t_eval = t_eval,
-    first_step=dt, rtol=1e-9, atol=1e-12)
-
+def plotting(solution):
     # Store r_x, r_y, and r_z in respective variables for plotting
     x = solution.y[0]/1000
     y = solution.y[1]/1000
@@ -99,6 +75,41 @@ def main():
 
     ax.set_aspect('equal')
     plt.show()
+
+
+
+def main():
+
+    # Other variables
+    dt = 0.01 # (s)
+    t_final = 60000 # (s)
+    state = [7500, 0, 0, 600, 7800, 150] # r_x (km), r_y (km), r_z (km), v_x (m/s), v_y (m/s), v_z (m/s)
+
+    # Commented everything with inputs out until J2 Perturbation is resolved
+    # state = user_input()
+
+    # Convert positions to meters and altitude to radius from Earth's center
+    state = np.array(state, dtype=float)
+    state[0:3] = state[0:3] * 1000
+
+    # Grabs a "slice" of the state vector (first and second elements)
+    r = state[0:3]
+    r_mag = np.linalg.norm(r)
+
+    # Create a variable that will guide how many points will be saved to solution by solve_ivp
+    t_eval = np.linspace(0, t_final, 1000)
+
+    # Check for valid conditions of initial position (if not valid stop the program)
+    if r_mag <= 6378137:
+        print("Error, the body is inside Earth. Exiting...")
+        sys.exit()
+
+    # ODE solver (using RK45)
+    solution = solve_ivp(deriv_calc, [0, t_final], state, method='RK45', t_eval = t_eval,
+    first_step=dt, rtol=1e-9, atol=1e-12)
+
+    plotting(solution)
+
 
 if __name__ == "__main__":
     main()
