@@ -4,11 +4,13 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# 3D, 2 Body Problem Orbit Simulation
+# 3D, 2 Body Problem Orbit Simulation (ECI)
 # Assumptions:
     # Earth has constant radius and is homogeneous
     # Treat Earth as a point mass with center of mass at origin
-    # x-y coordinate plane is centered at Earth's center
+    # x-axis: Vernal equinox
+    # y-axis: 90 degrees east of vernal equinox in equatorial plane
+    # z-axis: Celestial north pole
 
 
 # Parameters (all in SI Units)
@@ -16,16 +18,28 @@ rad_Earth = 6378137 # meters
 mass_Earth = 5.9722e24 # kg
 grav_const = 6.6743e-11 # (m^3)(kg^-1)(s^-2)
 mu_Earth = grav_const * mass_Earth # m^3/s^2
+j2 = 1.08263e-3 # dimensionless
 
-# Find acceleration in terms of x and y coordinates (derived from Newton's Second Law
+# Find acceleration using state vector
 def acceleration_calc(state):
     # Grabs a "slice" of the state vector (first and second elements)
     r = state[0:3]
     r_mag = np.linalg.norm(r)
 
-    # Returns both a_x and a_y
-        # Multiplying a scalar by an entire array which in our case is the r vector (allowed by Numpy)
-    return -mu_Earth * r / r_mag**3
+    # Coefficient for vector operations including J2 perturbation
+    j2_coeff = (3 * mu_Earth * j2 * rad_Earth ** 2)/(2*r_mag**7)
+
+    # Initiate acceleration vector
+    a=np.zeros(3)
+    a_j0 = -mu_Earth * r / r_mag**3
+
+    # Calculate acceleration vector
+    a[0] = a_j0[0] - j2_coeff*r[0]*(r_mag**2-5*r[2]**2)
+    a[1] = a_j0[1] - j2_coeff*r[1]*(r_mag**2-5*r[2]**2)
+    a[2] = a_j0[2] + j2_coeff*r[2]*(5*r[2]**2-3*r_mag**2)
+
+    # Returns acceleration vector
+    return a
 
 # Calculates f(t,y) that will be plugged into IVP solver
 def deriv_calc(t, state):
@@ -83,7 +97,7 @@ def main():
     # Other variables
     dt = 0.01 # (s)
     t_final = 60000 # (s)
-    state = [7500, 0, 0, 600, 7800, 150] # r_x (km), r_y (km), r_z (km), v_x (m/s), v_y (m/s), v_z (m/s)
+    state = [7078, 0, 0, 0, 3000, 7500] # r_x (km), r_y (km), r_z (km), v_x (m/s), v_y (m/s), v_z (m/s)
 
     # Commented everything with inputs out until J2 Perturbation is resolved
     # state = user_input()
@@ -113,12 +127,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
