@@ -95,7 +95,7 @@ def plotting(solution):
 def main():
 
     # Other variables
-    dt = 0.01 # (s)
+    dt = 10 # (s)
     t_final = 60000 # (s)
     state = [7078, 0, 0, 0, 3000, 7500] # r_x (km), r_y (km), r_z (km), v_x (m/s), v_y (m/s), v_z (m/s)
 
