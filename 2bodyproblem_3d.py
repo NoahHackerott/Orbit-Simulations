@@ -14,6 +14,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Parameters (all in SI Units)
+# TODO: Create a comprehensive parameters header file
 rad_Earth = 6378137 # meters
 mass_Earth = 5.9722e24 # kg
 grav_const = 6.6743e-11 # (m^3)(kg^-1)(s^-2)
