@@ -1,4 +1,5 @@
 import numpy as np
+import math as m
 
 # Takes state vector and calculates orbital elements
 def orbitalElementConversion(state):
@@ -25,11 +26,23 @@ def orbitalElementConversion(state):
     # Calculate specific angular momentum (m^2/s)
     h = np.cross(pos, vel)
 
+    # Define the ascending node vector
+    n = np.cross([0,0,1], h)
+
     # Calculate semi major axis (m)
     orbitalElements[0] = 1/((2/mag_pos)-(mag_vel**2/mu_earth))
 
     # Calculate eccentricity
     orbitalElements[1] = (1/mu_earth)*np.cross(vel, h)-pos/mag_pos
+
+    # Calculate inclination
+    orbitalElements[2] = m.acos(h[2]/np.linalg.norm(h))
+
+    # Calculate Right Ascension of the Ascending Node (RAAN)
+    orbitalElements[3] = m.acos(n[0]/np.linalg.norm(n))
+
+    # Calculate argument of perigee
+
 
 
 
